@@ -1,12 +1,15 @@
 <?php
 // Start session management with a persistent cookie
 $lifetime = 60 * 60 * 24 * 14;    // 2 weeks in seconds
-// $lifetime = 0;                      // per-session cookie
 session_set_cookie_params($lifetime, '/');
 session_start();
 
 // Create a cart array if needed
-if (empty($_SESSION['cart13'])) $_SESSION['cart13'] = array();
+if (empty($_SESSION['cart13'])) {
+    $cart = array();
+} else {
+    $cart = $_SESSION['cart13'];
+}
 
 // Create a table of products
 $products = array();
@@ -31,15 +34,16 @@ switch($action) {
     case 'add':
         $key = filter_input(INPUT_POST, 'productkey');
         $quantity = filter_input(INPUT_POST, 'itemqty');
-        add_item($key, $quantity);
+        rafer\cart\add_item($key, $quantity);
+        $_SESSION['cart13'] = $cart;
         include('cart_view.php');
         break;
     case 'update':
         $new_qty_list = filter_input(INPUT_POST, 'newqty', 
                 FILTER_DEFAULT, FILTER_REQUIRE_ARRAY);
         foreach($new_qty_list as $key => $qty) {
-            if ($_SESSION['cart13'][$key]['qty'] != $qty) {
-                update_item($key, $qty);
+            if ($cart[$key]['qty'] != $qty) {
+                rafer\cart\update_item($key, $qty);
             }
         }
         include('cart_view.php');
